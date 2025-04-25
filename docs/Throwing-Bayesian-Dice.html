@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Throwing Bayesian Dice: Sampling in Bayesian Networks</title>
+  <style>
+    body {
+      max-width: 800px;
+      margin: auto;
+      font-family: sans-serif;
+      line-height: 1.6;
+      padding: 2rem;
+    }
+    img {
+      width: 100%;
+      margin: 1rem 0;
+    }
+    code {
+      background-color: #f4f4f4;
+      padding: 0.2em 0.4em;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Throwing Bayesian Dice: Sampling in Bayesian Networks</h1>
+
+  <p>
+    I often feel that some concepts that are actually quite easy to explain are given intimidating names that scare off newcomers. Take Euclidean Distance and Manhattan Distance, for example.
+  </p>
+
+  <p>
+    In 2D, Euclidean Distance is just straight-line distance:<br>
+    <code>d = sqrt((x₁ − x₂)² + (y₁ − y₂)²)</code><br>
+    Manhattan Distance is the sum of absolute coordinate differences:<br>
+    <code>d = |x₁ − x₂| + |y₁ − y₂|</code>
+  </p>
+
+  <p>
+    The name "Manhattan" refers to grid-like city streets — you can only walk vertically and horizontally, not diagonally. But if that’s the logic, shouldn't it also be called "Tokyo Distance"? Or "Chang’an Distance" from ancient China? After all, that city had a grid layout centuries ago.
+  </p>
+
+  <p>
+    My philosophy: good knowledge should be understandable without requiring irrelevant background. The best physics or math should be explainable to kids. Since we live in a world of complicated names, let's do our best to unpack them.
+  </p>
+
+  <p>
+    This article starts with the Monte Carlo method and then explores four Monte Carlo variants for sampling-based inference in Bayesian Networks.
+  </p>
+
+  <h2>1. What is the Monte Carlo Method?</h2>
+  <p>
+    Don't be scared by the name! Even if you've never heard of it, you've probably used the idea intuitively many times.
+  </p>
+  <p>
+    Monte Carlo methods involve generating lots of random samples and using their statistical properties (like frequency or average) to approximate a probability or expectation.
+  </p>
+  <p>
+    For example, to estimate <code>P(A|B)</code>, we use:<br>
+    <code>P(A|B) ≈ count(A,B) / count(B)</code>
+  </p>
+  <p>
+    Imagine you don’t know the probability of flipping heads. Just flip a coin n times, count how many heads (say h), and estimate <code>P(heads) ≈ h/n</code>. If n is large, this is a good approximation.
+  </p>
+
+  <h2>2. Inference in Bayesian Networks: Exact Calculation</h2>
+  <p>
+    Let's take a simple Bayesian network: <code>A → B → C</code>, with each node taking values 0 or 1.
+  </p>
+  <p>
+    Given: <code>P(A)</code>, <code>P(B|A)</code>, and <code>P(C|B)</code>
+  </p>
+  <p>
+    Problem: What is <code>P(A=1 | C=1)</code>?
+  </p>
+  <p>
+    Using the chain rule:<br>
+    <code>P(A=1 | C=1) = P(A=1, C=1) / P(C=1)</code><br>
+    <code>= Σ_B P(A=1, B, C=1) / Σ_A Σ_B P(A, B, C=1)</code><br>
+    <code>= Σ_B P(A=1) * P(B|A=1) * P(C=1|B)</code><br>
+    <code>/ Σ_A Σ_B P(A) * P(B|A) * P(C=1|B)</code>
+  </p>
+
+  <p>
+    This works, but let's look at the complexity:
+  </p>
+  <p>
+    If we have n nodes and k values per node, this is roughly <code>O(kⁿ)</code> — exponential!  
+    With loops or complex topologies, exact inference becomes impractical.
+  </p>
+
+  <h2>3. Inference via Sampling: Monte Carlo Variants</h2>
+  <p>
+    Sampling methods make inference more feasible. All of the following use Monte Carlo-style sampling:
+  </p>
+  <ul>
+    <li>Prior Sampling</li>
+    <li>Rejection Sampling</li>
+    <li>Likelihood Weighting</li>
+    <li>Gibbs Sampling</li>
+  </ul>
+
+  <p>Let’s work with this example again:</p>
+
+  <p><strong>A → B → C</strong> (all binary)</p>
+  <p>Known probabilities:</p>
+
+  <img src="ThrowingBayesianDice-probability.webp" alt="Probability Tables" />
+
+  <p>Target: <code>P(A=1 | B=1)</code>. B=1 is our <strong>evidence</strong>.</p>
+
+  <h3>Prior Sampling</h3>
+  <p>
+    - Randomly generate values using uniform samples [0,1]<br>
+    - Based on probability tables, sample A, then B based on A, then C based on B<br>
+    - Repeat many times<br>
+    - Estimate: <code>P(A=1 | B=1) = count(A=1,B=1) / count(B=1)</code>
+  </p>
+
+  <h3>Rejection Sampling</h3>
+  <p>
+    Same as Prior Sampling, but reject samples where <code>B ≠ 1</code>.  
+    Saves work by skipping unnecessary samples.
+  </p>
+
+  <h3>Likelihood Weighting</h3>
+  <p>
+    - Instead of rejecting samples, always force evidence to match (set B=1)  
+    - Assign a weight <code>W = P(B=1|A)</code> for each sample  
+    - Estimate: <code>P(A=1|B=1) ≈ Σ(weighted A=1 samples) / Σ(all weights)</code>
+  </p>
+
+  <h3>Gibbs Sampling</h3>
+  <p>
+    - Use Markov Chain Monte Carlo (MCMC) to iterate<br>
+    - Start with a random full assignment like <code>[A=0, B=1, C=0]</code> (B fixed)<br>
+    - Iteratively resample one variable at a time using conditional distributions<br>
+    - After many iterations, the samples approximate the true distribution
+  </p>
+
+  <h2>Conclusion</h2>
+  <p>
+    If you remember just one thing:  
+    <em>Monte Carlo is just statistics approximating probability.</em>  
+    When Bayesian networks become too hard to compute exactly — just sample!
+  </p>
+  <ul>
+    <li>Prior Sampling = random guessing</li>
+    <li>Rejection = selective guessing</li>
+    <li>Likelihood = weighted guessing</li>
+    <li>Gibbs = iterative guessing</li>
+  </ul>
+
+</body>
+</html>
