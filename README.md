@@ -3,7 +3,7 @@
 This repository contains two parts:
 
 - `Articles/`: My original articles, writings, and documentation.
-- 'docs/': Github Pages
+- `docs/`: Github Pages
 - All other directories and files: Code and scripts related to the project.
 
 ## 📄 License
