@@ -2,12 +2,13 @@
 
 This repository contains two parts:
 
-- `Articles/`: My original articles, writings, and documentation.  
+- `Articles/`: My original articles, writings, and documentation.
+- 'docs/': Github Pages
 - All other directories and files: Code and scripts related to the project.
 
 ## 📄 License
 
-- **Articles/** are licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).  
+- **Articles/** & **docs/** are licensed under the [Creative Commons Attribution 4.0 International License (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/).  
   You are free to share and adapt the material as long as proper credit is given.
 
 - **Code files** are licensed under the [MIT License](./LICENSE), allowing for reuse, modification, and commercial use with attribution.
